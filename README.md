@@ -63,6 +63,136 @@ Family Key 是一个基于区块链技术的去中心化加密资产信托平台
 - **Chain ID**：84532
 - **RPC URL**：配置在环境变量 `VITE_RPC_URL`
 
+### 架构图
+
+```mermaid
+graph TB
+    subgraph "用户层 User Layer"
+        Owner[资产所有者<br/>Asset Owner]
+        Beneficiary[受益人<br/>Beneficiary]
+        Browser[Web浏览器<br/>Web Browser]
+    end
+
+    subgraph "前端层 Frontend Layer"
+        WebApp[React + Wagmi + Viem<br/>Web Application]
+        SIWE[Sign-In with Ethereum<br/>SIWE Auth]
+        WalletConnect[钱包连接<br/>Wallet Connection<br/>WalletConnect/MetaMask]
+    end
+
+    subgraph "后端层 Backend Layer"
+        API[NestJS API Server]
+        AuthService[认证服务<br/>Auth Service]
+        InviteService[邀请服务<br/>Invite Service]
+        SafeService[Safe管理服务<br/>Safe Service]
+        BeneficiaryService[受益人服务<br/>Beneficiary Service]
+        NotificationService[通知服务<br/>Notification Service]
+        Database[(MySQL + Prisma<br/>Database)]
+    end
+
+    subgraph "智能合约层 Smart Contract Layer"
+        subgraph "Safe协议 Safe Protocol"
+            SafeWallet[Safe多签钱包<br/>Safe Multisig Wallet]
+            SafeModule[Safe模块接口<br/>ISafe Interface]
+        end
+
+        subgraph "核心模块 Core Module"
+            DMSModule[死人开关模块<br/>DeadManSwitch Module]
+        end
+
+        subgraph "DeFi Vaults 收益金库"
+            LidoVault[Lido质押金库<br/>LidoVault<br/>APY: 4.5% 低风险]
+            AaveVault[Aave借贷金库<br/>AaveVault<br/>APY: 7.5% 中风险]
+            MorphoVault[Morpho优化金库<br/>MorphoVault<br/>APY: 12% 高风险]
+        end
+    end
+
+    subgraph "区块链协议层 Blockchain Protocol Layer"
+        Ethereum[以太坊网络<br/>Ethereum Network]
+
+        subgraph "DeFi协议 DeFi Protocols"
+            Lido[Lido协议<br/>Liquid Staking Protocol<br/>流动性质押]
+            Aave[Aave协议<br/>Lending Protocol<br/>借贷协议]
+            Morpho[Morpho协议<br/>Optimized Lending<br/>优化借贷]
+        end
+    end
+
+    %% 用户交互流
+    Owner --> Browser
+    Beneficiary --> Browser
+    Browser --> WebApp
+
+    %% 前端交互
+    WebApp --> SIWE
+    WebApp --> WalletConnect
+    WebApp --> API
+
+    %% 后端服务
+    API --> AuthService
+    API --> InviteService
+    API --> SafeService
+    API --> BeneficiaryService
+    API --> NotificationService
+
+    AuthService --> Database
+    InviteService --> Database
+    SafeService --> Database
+    BeneficiaryService --> Database
+    NotificationService --> Database
+
+    %% 合约交互
+    WebApp --> SafeWallet
+    WebApp --> DMSModule
+    WebApp --> LidoVault
+    WebApp --> AaveVault
+    WebApp --> MorphoVault
+
+    SafeService --> SafeWallet
+    SafeService --> DMSModule
+
+    %% Safe协议模块化
+    SafeWallet --> SafeModule
+    DMSModule --> SafeModule
+    SafeWallet --> DMSModule
+
+    %% 资金流转
+    SafeWallet -.存款.-> LidoVault
+    SafeWallet -.存款.-> AaveVault
+    SafeWallet -.存款.-> MorphoVault
+
+    %% DeFi协议集成
+    LidoVault --> Lido
+    AaveVault --> Aave
+    MorphoVault --> Morpho
+
+    %% 区块链层
+    SafeWallet --> Ethereum
+    DMSModule --> Ethereum
+    LidoVault --> Ethereum
+    AaveVault --> Ethereum
+    MorphoVault --> Ethereum
+
+    Lido --> Ethereum
+    Aave --> Ethereum
+    Morpho --> Ethereum
+
+    %% 样式定义
+    classDef userClass fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
+    classDef frontendClass fill:#f3e5f5,stroke:#4a148c,stroke-width:2px;
+    classDef backendClass fill:#fff3e0,stroke:#e65100,stroke-width:2px;
+    classDef contractClass fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px;
+    classDef vaultClass fill:#fff9c4,stroke:#f57f17,stroke-width:2px;
+    classDef protocolClass fill:#fce4ec,stroke:#880e4f,stroke-width:2px;
+    classDef blockchainClass fill:#e0f2f1,stroke:#004d40,stroke-width:3px;
+
+    class Owner,Beneficiary,Browser userClass;
+    class WebApp,SIWE,WalletConnect frontendClass;
+    class API,AuthService,InviteService,SafeService,BeneficiaryService,NotificationService,Database backendClass;
+    class SafeWallet,SafeModule,DMSModule contractClass;
+    class LidoVault,AaveVault,MorphoVault vaultClass;
+    class Lido,Aave,Morpho protocolClass;
+    class Ethereum blockchainClass;
+```
+
 ---
 
 ## 🚀 快速开始

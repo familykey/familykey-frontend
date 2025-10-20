@@ -63,6 +63,136 @@ Family Key is a decentralized crypto asset trust platform built on blockchain te
 - **Chain ID**: 84532
 - **RPC URL**: Configure via the `VITE_RPC_URL` environment variable
 
+### Architecture Diagram
+
+```mermaid
+graph TB
+    subgraph "User Layer"
+        Owner[Asset Owner]
+        Beneficiary[Beneficiary]
+        Browser[Web Browser]
+    end
+
+    subgraph "Frontend Layer"
+        WebApp[React + Wagmi + Viem<br/>Web Application]
+        SIWE[Sign-In with Ethereum<br/>SIWE Auth]
+        WalletConnect[Wallet Connection<br/>WalletConnect / MetaMask]
+    end
+
+    subgraph "Backend Layer"
+        API[NestJS API Server]
+        AuthService[Auth Service]
+        InviteService[Invite Service]
+        SafeService[Safe Service]
+        BeneficiaryService[Beneficiary Service]
+        NotificationService[Notification Service]
+        Database[(MySQL + Prisma<br/>Database)]
+    end
+
+    subgraph "Smart Contract Layer"
+        subgraph "Safe Protocol"
+            SafeWallet[Safe Multisig Wallet]
+            SafeModule[ISafe Interface]
+        end
+
+        subgraph "Core Module"
+            DMSModule[Dead Man Switch Module]
+        end
+
+        subgraph "DeFi Vaults"
+            LidoVault[Lido Vault<br/>APY: 4.5% Low Risk]
+            AaveVault[Aave Vault<br/>APY: 7.5% Medium Risk]
+            MorphoVault[Morpho Vault<br/>APY: 12% High Risk]
+        end
+    end
+
+    subgraph "Blockchain Protocol Layer"
+        Ethereum[Ethereum Network]
+
+        subgraph "DeFi Protocols"
+            Lido[Lido Protocol<br/>Liquid Staking]
+            Aave[Aave Protocol<br/>Lending]
+            Morpho[Morpho Protocol<br/>Optimized Lending]
+        end
+    end
+
+    %% User interaction flow
+    Owner --> Browser
+    Beneficiary --> Browser
+    Browser --> WebApp
+
+    %% Frontend interactions
+    WebApp --> SIWE
+    WebApp --> WalletConnect
+    WebApp --> API
+
+    %% Backend services
+    API --> AuthService
+    API --> InviteService
+    API --> SafeService
+    API --> BeneficiaryService
+    API --> NotificationService
+
+    AuthService --> Database
+    InviteService --> Database
+    SafeService --> Database
+    BeneficiaryService --> Database
+    NotificationService --> Database
+
+    %% Contract interactions
+    WebApp --> SafeWallet
+    WebApp --> DMSModule
+    WebApp --> LidoVault
+    WebApp --> AaveVault
+    WebApp --> MorphoVault
+
+    SafeService --> SafeWallet
+    SafeService --> DMSModule
+
+    %% Safe protocol modularity
+    SafeWallet --> SafeModule
+    DMSModule --> SafeModule
+    SafeWallet --> DMSModule
+
+    %% Capital flow
+    SafeWallet -.Deposit.-> LidoVault
+    SafeWallet -.Deposit.-> AaveVault
+    SafeWallet -.Deposit.-> MorphoVault
+
+    %% DeFi integrations
+    LidoVault --> Lido
+    AaveVault --> Aave
+    MorphoVault --> Morpho
+
+    %% Blockchain connectivity
+    SafeWallet --> Ethereum
+    DMSModule --> Ethereum
+    LidoVault --> Ethereum
+    AaveVault --> Ethereum
+    MorphoVault --> Ethereum
+
+    Lido --> Ethereum
+    Aave --> Ethereum
+    Morpho --> Ethereum
+
+    %% Styling
+    classDef userClass fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
+    classDef frontendClass fill:#f3e5f5,stroke:#4a148c,stroke-width:2px;
+    classDef backendClass fill:#fff3e0,stroke:#e65100,stroke-width:2px;
+    classDef contractClass fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px;
+    classDef vaultClass fill:#fff9c4,stroke:#f57f17,stroke-width:2px;
+    classDef protocolClass fill:#fce4ec,stroke:#880e4f,stroke-width:2px;
+    classDef blockchainClass fill:#e0f2f1,stroke:#004d40,stroke-width:3px;
+
+    class Owner,Beneficiary,Browser userClass;
+    class WebApp,SIWE,WalletConnect frontendClass;
+    class API,AuthService,InviteService,SafeService,BeneficiaryService,NotificationService,Database backendClass;
+    class SafeWallet,SafeModule,DMSModule contractClass;
+    class LidoVault,AaveVault,MorphoVault vaultClass;
+    class Lido,Aave,Morpho protocolClass;
+    class Ethereum blockchainClass;
+```
+
 ---
 
 ## 🚀 Getting Started
