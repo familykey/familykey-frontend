@@ -453,14 +453,6 @@ This is a private project. All rights reserved. Unlicensed use, copying, or dist
 
 ---
 
-## 📞 Contact
-
-Questions or suggestions? Reach out via:
-
-- **Repository**: [GitHub Repository]
-- **Issue Tracker**: [GitHub Issues]
-
----
 
 ## 🙏 Acknowledgments
 
